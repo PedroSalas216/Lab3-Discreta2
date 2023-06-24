@@ -83,7 +83,7 @@ list_elem list_by_index(list s, u32 index) {
 list_elem *list_to_array(list s)
 {
   assert(s != NULL);
-  list_elem *arr = NULNULLL;
+  list_elem *arr = NULL;
   if(s->len) {
     arr = calloc(s->len, sizeof(list_elem));
     arr = memcpy(arr, s->elems, s->len*sizeof(list_elem));
