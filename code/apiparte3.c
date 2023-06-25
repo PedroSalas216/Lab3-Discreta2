@@ -3,7 +3,7 @@
 #include "apiparte3.h"
 #include <stdbool.h>
 
-#define ERROR_CODE (2^32 -1)
+#define ERROR_CODE ((2^(32)) -1)
 #define NULL_COLOR __UINT32_MAX__
 
 static u32 colorear (Grafo g, u32 indice_real ,u32* Color){

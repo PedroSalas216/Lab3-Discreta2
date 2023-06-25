@@ -33,13 +33,15 @@ int main() {
         color[i] = NULL_COLOR;
         orden[i] = i;
     }
-
-    u32 ji = GreedyDinamico(g,orden,color,n +1 );
     
 
+    printf("Fin inicializaciones \n");
+    u32 ji = GreedyDinamico(g,orden,color,n +1 );
+        
+
+    printf("Fin greedy \n");
     if (checkear_coloreo(g,color)){
-        printf("Coloreo Propio: ");
-        printf("X(G) ~ %u\n", ji);
+        printf("Coloreo Propio: X(G) ~ %u\n", ji);
     }else{
         printf("Coloreo No propio \n");
     }
