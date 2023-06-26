@@ -126,7 +126,7 @@ u32 GreedyDinamico(Grafo G, u32* Orden, u32* Color, u32 p){
 
 */
 
-struct data {
+struct data_fo {
     u32 cant_vert;
     u32 *vert;
     u32 m;
@@ -136,8 +136,8 @@ struct data {
 
 
 static int compar_FO(const void *elem1, const void *elem2) {
-  struct data e1 = *((struct data *)elem1);
-  struct data e2= *((struct data *)elem2);
+  struct data_fo e1 = *((struct data_fo *)elem1);
+  struct data_fo e2= *((struct data_fo *)elem2);
   if (e2.E < e1.E)
         return -1;
     else if (e2.E > e1.E)
@@ -154,6 +154,7 @@ char FirstOrder(Grafo G, u32* Orden, u32* Color){
     
     
     // Cuenta la cantidad de colores que estan siendo usados por Color
+    // Complejidad 0(n)
     for (u32 i = 0; i < n; i++) {
 
         if (Color[i] != NULL_COLOR) {
@@ -163,11 +164,11 @@ char FirstOrder(Grafo G, u32* Orden, u32* Color){
             return '1';
         }        
     }
-
     cant_color = max_color +1;
+
     // Creacion e inicializacion del array data
     // Complejidad O(cantidad de colores usados)
-    struct data* data = calloc(cant_color , sizeof(struct data));
+    struct data_fo* data = calloc(cant_color , sizeof(struct data_fo));
     for (u32 i = 0; i < cant_color ; i++) {
         data[i].cant_vert = 0;
         data[i].vert = calloc(n,sizeof(u32));
@@ -205,7 +206,7 @@ char FirstOrder(Grafo G, u32* Orden, u32* Color){
     
     // Ordenamos data segun E con orden descendente 
     // Complejidad O(n log n)
-    qsort(data, (size_t)cant_color, sizeof(struct data), compar_FO); 
+    qsort(data, (size_t)cant_color, sizeof(struct data_fo), compar_FO); 
 
 
     // Complejidad O(n)
@@ -218,7 +219,9 @@ char FirstOrder(Grafo G, u32* Orden, u32* Color){
     }
         
     
-    
+    // Complejidad total = O(n + cantidad colores usados + n + n log n) 
+    // como cantidad de colores usados <= n 
+    // queda O(3n + n log n) = O(n log n)
     return '0';
 }
 
