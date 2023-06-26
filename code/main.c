@@ -45,17 +45,17 @@ int main() {
         printf("Coloreo No propio \n");
     }
     
-    // FirstOrder(g, orden, color);
-    // printf("First order hecho una vez \n");
-    // ji = GreedyDinamico(g,orden,color,n +1 );
+    char c = FirstOrder(g, orden, color);
+    printf("Reorder hecho una vez: %s\n", c == '0' ? "SUCCESS" : "FAILURE");
+    ji = GreedyDinamico(g,orden,color,n +1 );
 
     
-    // printf("Fin greedy \n");
-    // if (checkear_coloreo(g,color)){
-    //     printf("Coloreo Propio: X(G) ~ %u\n", ji);
-    // }else{
-    //     printf("Coloreo No propio \n");
-    // }
+    printf("Fin greedy \n");
+    if (checkear_coloreo(g,color)){
+        printf("Coloreo Propio: X(G) ~ %u\n", ji);
+    }else{
+        printf("Coloreo No propio \n");
+    }
 
     DestruirGrafo(g);
     return 0;
