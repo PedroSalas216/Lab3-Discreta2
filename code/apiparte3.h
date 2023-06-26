@@ -3,8 +3,13 @@
 
 #include "apig23.h"
 
-// Asume que Orden es un array de n elementos que provee un orden de los indices
-// Tambien asume que Color apunta a un sector de memoria con al menos n lugares disponibles.
+// se usa como codigo de error en GreedyDinamico
+#define ERROR_CODE ((2^(32)) -1)    
+
+// estas dos macros se usan para distintas cosas, para mejorar la legibilidad del codigo
+#define NULL_COLOR __UINT32_MAX__    
+#define MAX_U32 __UINT32_MAX__
+
 
 u32 GreedyDinamico(Grafo G, u32* Orden, u32* Color, u32 p);
 
