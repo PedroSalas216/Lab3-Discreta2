@@ -1,7 +1,7 @@
 #ifndef APIParte3_H
 #define APIParte3_H
 
-#include "apig23.h"
+#include "APIG23.h"
 
 // se usa como codigo de error en GreedyDinamico
 #define ERROR_CODE ((2^(32)) -1)    

@@ -1,6 +1,6 @@
 
-#include "apig23.h"
-#include "apiparte3.h"
+#include "APIG23.h"
+#include "APIParte3.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
