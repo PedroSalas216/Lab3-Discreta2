@@ -2,7 +2,7 @@ TARGET = a.out
 
 all:
 	# $(CC) -o a.out main.c $(OBJECTS)
-	gcc -g -o $(TARGET) -Wall -Wextra -std=c99 -O3  main.c list.c vertice.c apiparte3-* APIG23.c
+	gcc -g -o $(TARGET) -Wall -Wextra -std=c99 -O3  main.c list.c vertice.c apiparte3.c APIG23.c
 
 clean:
 	rm $(TARGET) 
