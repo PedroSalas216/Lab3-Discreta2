@@ -123,7 +123,6 @@ u32 GreedyDinamico(Grafo G, u32* Orden, u32* Color, u32 p){
     // con x = 2 si p >= n
     //       = 3 si p aproxima 0
 }
-
 */
 
 static u32 colorear (Grafo g, u32 indice_real ,u32* Color){
@@ -163,13 +162,11 @@ static u32 colorear (Grafo g, u32 indice_real ,u32* Color){
 
 
 
-// pone en la posicion i de ordenDinamico al elemento con mayor nc
-// no toca nada antes de i
-// el orden efectivo que queda en ordendinamico despues de terminar 
-//  el loop es el orden real en el que se coloreo
-
 /*
     NC = cantidad de colores distintos usados por los vecinos de cada vertice.
+
+    - Pone en la posicion i de ordenDinamico al elemento con mayor nc
+    - No toca nada antes de i
 */
 static u32 nc(Grafo G, u32* OrdenDinamico, u32* Color, u32 elem){
     u32 n = NumeroDeVertices(G);
@@ -222,54 +219,44 @@ u32 GreedyDinamico(Grafo G, u32* Orden, u32* Color, u32 p){
             nc = indice (en Orden[]) del vertice con mayor cantidad de colores distintos entre sus vecinos
     */
     u32 xi = 0;
+    u32 color;
     u32 n = NumeroDeVertices(G);
-    u32* ordenDinamico = NULL;
-    u32 vertice = 0;
-   
-    for (u32 i = 0; i < n; i++){
-        Color[i] = NULL_COLOR;
+    
+
+    for (u32 i = 0; i < n; i++) {
+        Color[i] = MAX_U32;
     }
-    if (n < p) { // voy a tener que hacer la parte dinamica del ejercicio
-        ordenDinamico = calloc(n,sizeof(u32));
-        for (u32 i; i<n; ++i)
-            ordenDinamico[i] = Orden[i];
+
+    if (Orden == NULL) {
+        return ERROR_CODE;
     }
     
-    for (u32 i = 0; i < p; i++) {
-        vertice = Orden[i];
-        u32 c = colorear(G,vertice,Color);
+    
 
-        if (c = MAX_U32 && i != n) {
+    for (u32 i = 0; i < n; i++) {
+        u32 vertice_a_colorear;
+
+        if (i < p) {
+            vertice_a_colorear = i;
+        } else {
+            nc(G,Orden,Color,i);
+            vertice_a_colorear = i;
+        }
+
+        color = colorear(G,vertice_a_colorear,Color);
+
+        if (color == MAX_U32 && i != MAX_U32){
             return ERROR_CODE;
         }
 
-        Color[vertice] = c;
-        xi = xi < c ? c : xi;
+        xi = xi < color ? color : xi;
+        Color[vertice_a_colorear] = color;
     }
-    
-    for (u32 i = p; i < n; i++) {
-        nc(G,ordenDinamico,Color,i);
-        // pone en la posicion i de ordenDinamico al elemento con mayor nc
-        // no toca nada antes de i
-        // el orden efectivo que queda en ordendinamico despues de terminar 
-        //  el loop es el orden real en el que se coloreo
-        vertice = ordenDinamico[i];
-        u32 c = colorear(G,vertice,Color);
-
-        if (c = MAX_U32 && i != n) {
-            return ERROR_CODE;
-        }
-
-        Color[vertice] = c;
-        xi = xi < c ? c : xi;
-    }
-    
-    free(ordenDinamico);
-    return xi +1;
+    return xi+1;
 }
 
 // COMIENZA FIRST ORDER Complejidad O(n log n)
-/*
+
 struct data_fo {
     u32 cant_vert;
     u32 *vert;
@@ -470,4 +457,3 @@ char SecondOrder(Grafo G,u32* Orden,u32* Color){
     // queda O(5n + n log n) = O(n log n)
     return '0';
 }
-*/

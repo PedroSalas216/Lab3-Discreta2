@@ -27,8 +27,7 @@ int main() {
     u32 *color = calloc(n, sizeof(u32));
     u32 *orden = calloc(n, sizeof(u32));
 
-
-    // se prueba con orden natural al principio 
+    // orden natural 
     for (u32 i = 0; i < n; i++) {
         orden[i] = i;
     }
