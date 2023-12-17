@@ -1,19 +1,19 @@
 #include "APIParte3.h"
 #include "stdio.h"
 
-bool checkear_coloreo(Grafo G, u32 *Color) {
+u32 checkear_coloreo(Grafo G, u32 *Color) {
     // O(m)
     for (u32 index = 0; index < NumeroDeVertices(G); ++index) {
         if (Color[index] == NULL_COLOR) { // si hay un vertice que no tiene color esta mal
-            return false;
+            return 1;
         }
         for (u32 vecino = 0; vecino < Grado(index, G); ++vecino) {
             if (Color[index] == Color[IndiceVecino(vecino, index, G)]) {
-                return false;   
+                return 2;   
             }
         }
     }
-    return true;
+    return 0;
 }
 
 
@@ -38,10 +38,14 @@ int main() {
 
     
     printf("Fin greedy \n");
-    if (checkear_coloreo(g,color)){
+    u32 check = checkear_coloreo(g,color);
+    if (check == 0){
         printf("Coloreo Propio: X(G) ~ %u\n", ji);
     }else{
-        printf("Coloreo No propio \n");
+        if( check == 1)
+            printf("Coloreo No propio, hay vertices sin colorear , %u\n", ji);
+        else 
+            printf("Coloreo no propio, hay vertices conectados con el mismo color \n");
     }
     
     char c = FirstOrder(g, orden, color);
