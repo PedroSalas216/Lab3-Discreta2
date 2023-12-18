@@ -176,7 +176,11 @@ u32 GreedyDinamico(Grafo G, u32 *Orden, u32 *Color, u32 p)
         if (colors_used < last_color)
             colors_used = last_color;
         
-        Color[Orden[i]] = last_color;
+        if (Color[Orden[i]] == NULL_COLOR)
+        {
+            Color[Orden[i]] = last_color;
+        }
+        
         
         
         if (i <= p)
