@@ -105,7 +105,7 @@ static void np_initialize(Grafo G, u32 *Color, u32 *NP)
 
     for (u32 i = 0; i < N; i++)
     {
-        if (Color[i] == NULL_COLOR)
+        if (Color[i] != NULL_COLOR)
         {
             NP[i] = MAX_U32;
         }
@@ -179,7 +179,6 @@ u32 GreedyDinamico(Grafo G, u32 *Orden, u32 *Color, u32 p)
             max_color = color_usado;
 
         Color[vertice_por_colorear] = color_usado;
-
         if (p <= i)
             np_update(G, Color, NP, vertice_por_colorear);
     }
@@ -416,3 +415,5 @@ char SecondOrder(Grafo G, u32 *Orden, u32 *Color)
     // queda O(5n + n log n) = O(n log n)
     return '0';
 }
+
+
