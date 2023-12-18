@@ -50,8 +50,8 @@ static u32 popular_colores_usados_por_vecinos(Grafo G, u32 indice, u32 *Color, u
  */
 static u32 coloreo(Grafo G, u32 objetivo, u32 *Color)
 {
-    u32 grado = Grado(objetivo, G);
-    u32 used_color = 0;
+    // u32 grado = Grado(objetivo, G);
+    u32 color_a_usar = MAX_U32;
 
     // vector binario que tiene la siguiente semantica
     // 0 - no esta usado
@@ -61,19 +61,18 @@ static u32 coloreo(Grafo G, u32 objetivo, u32 *Color)
     popular_colores_usados_por_vecinos(G, objetivo, Color, colores_usados);
 
     // encuentro el primer hueco
-    u32 i = 0;
-    while (i < NumeroDeVertices(G) && colores_usados != NULL)
+    for (u32 i = 0; i < NumeroDeVertices(G); i++)
     {
-        if (colores_usados[i] != USED_COLOR)
+        if (colores_usados[i] == 0)
         {
-            used_color = i;
-            free(colores_usados);
-            colores_usados = NULL;
+            color_a_usar = i;
+            break;
         }
-        ++i;
-    }
 
-    return used_color;
+    }
+    free(colores_usados);
+    colores_usados = NULL;
+    return color_a_usar;
 }
 
 /**
@@ -87,7 +86,6 @@ static u32 coloreo(Grafo G, u32 objetivo, u32 *Color)
  */
 static void np_update(Grafo G, u32 *Color, u32 *NP, u32 focus_vertex)
 {
-
     u32 N = NumeroDeVertices(G);
     u32 *colores_usados = calloc(N, sizeof(u32));
 
@@ -117,6 +115,9 @@ static void np_initialize(Grafo G, u32 *Color, u32 *NP)
             NP[i] = popular_colores_usados_por_vecinos(G, i, Color, colores_usados);
         }
     }
+
+    free(colores_usados);
+    
 }
 
 /**
@@ -126,16 +127,16 @@ static void np_initialize(Grafo G, u32 *Color, u32 *NP)
  * @param N
  * @return u32
  */
-static u32 get_best_np(u32 *NP, u32 N)
+static u32 get_best_np(u32 *NP, u32* Orden, u32 N)
 {
     u32 best_np = 0;
     u32 max_np = 0;
     for (u32 i = 0; i < N; i++)
     {
-        if (NP[i] != MAX_U32 && max_np < NP[i])
+        if (NP[Orden[i]] != MAX_U32 && max_np < NP[Orden[i]])
         {
-            best_np = i;
-            max_np = NP[i];
+            best_np = Orden[i];
+            max_np = NP[Orden[i]];
         }
     }
     return best_np;
@@ -163,13 +164,20 @@ u32 GreedyDinamico(Grafo G, u32 *Orden, u32 *Color, u32 p)
 
         if (i <= p){
             if (i == p) np_initialize(G, Color, NP);
-            next_vert_id = get_best_np(NP, N);
+            next_vert_id = get_best_np(NP, Orden,N);
         }
         
-        u32 last_color = coloreo(G, i, Color);
+        u32 last_color = coloreo(G, Orden[i], Color);
+
+        if (last_color == NULL_COLOR) {
+            return NULL_COLOR;
+        }
 
         if (colors_used < last_color)
             colors_used = last_color;
+        
+        Color[Orden[i]] = last_color;
+        
         
         if (i <= p)
             np_update(G, Color, NP, next_vert_id);
