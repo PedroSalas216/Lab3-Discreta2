@@ -68,7 +68,6 @@ static u32 coloreo(Grafo G, u32 objetivo, u32 *Color)
             color_a_usar = i;
             break;
         }
-
     }
     free(colores_usados);
     colores_usados = NULL;
@@ -117,7 +116,6 @@ static void np_initialize(Grafo G, u32 *Color, u32 *NP)
     }
 
     free(colores_usados);
-    
 }
 
 /**
@@ -127,7 +125,7 @@ static void np_initialize(Grafo G, u32 *Color, u32 *NP)
  * @param N
  * @return u32
  */
-static u32 get_best_np(u32 *NP, u32* Orden, u32 N)
+static u32 get_best_np(u32 *NP, u32 *Orden, u32 N)
 {
     u32 best_np = 0;
     u32 max_np = 0;
@@ -144,12 +142,12 @@ static u32 get_best_np(u32 *NP, u32* Orden, u32 N)
 
 u32 GreedyDinamico(Grafo G, u32 *Orden, u32 *Color, u32 p)
 {
-    // useful vars
+    // inicializaciones 
     u32 N = NumeroDeVertices(G);
     u32 *NP = calloc(N, sizeof(u32));
-    u32 colors_used = 0;
+    u32 max_color = 0;
 
-    // inicializo Color, NP
+    
     for (u32 i = 0; i < N; i++)
     {
         Color[i] = NULL_COLOR;
@@ -158,53 +156,36 @@ u32 GreedyDinamico(Grafo G, u32 *Orden, u32 *Color, u32 p)
 
     p = p == 0 ? 1 : p;
 
+    // cómputo 
     for (u32 i = 0; i < N; i++)
     {
-        u32 next_vert_id = 0;
-
-        if (i <= p){
-            if (i == p) np_initialize(G, Color, NP);
-            next_vert_id = get_best_np(NP, Orden,N);
-        }
-        
-        u32 last_color = coloreo(G, Orden[i], Color);
-
-        if (last_color == NULL_COLOR) {
-            return NULL_COLOR;
-        }
-
-        if (colors_used < last_color)
-            colors_used = last_color;
-        
-        if (Color[Orden[i]] == NULL_COLOR)
+        u32 vertice_por_colorear = Orden[i];
+        if (p <= i)
         {
-            Color[Orden[i]] = last_color;
+            if (i == p)
+                np_initialize(G, Color, NP);
+
+            vertice_por_colorear = get_best_np(NP, Orden, N);
         }
-        
-        
-        
-        if (i <= p)
-            np_update(G, Color, NP, next_vert_id);
+
+        u32 color_usado = coloreo(G, vertice_por_colorear, Color);
+
+        if (color_usado == NULL_COLOR)
+            return ERROR_CODE;
+        if (Color[vertice_por_colorear] != NULL_COLOR)
+            return ERROR_CODE;
+
+        if (max_color < color_usado)
+            max_color = color_usado;
+
+        Color[vertice_por_colorear] = color_usado;
+
+        if (p <= i)
+            np_update(G, Color, NP, vertice_por_colorear);
     }
 
-    return colors_used + 1;
+    return max_color + 1;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // COMIENZA FIRST ORDER Complejidad O(n log n)
 
