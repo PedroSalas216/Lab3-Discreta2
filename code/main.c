@@ -67,7 +67,7 @@ int main()
             printf("Coloreo no propio, hay vertices conectados con el mismo color \n");
     }
 
-    char c = SecondOrder(g, orden, color);
+    char c = FirstOrder(g, orden, color);
     printf("Reorder hecho una vez: %s\n", c == '0' ? "SUCCESS" : "FAILURE");
 
 
@@ -88,7 +88,8 @@ int main()
     printf("\n\n");
 
     printf("Fin greedy \n");
-    if (checkear_coloreo(g, color))
+    check = checkear_coloreo(g,color);
+    if (check == 0)
     {
         printf("Coloreo Propio: X(G) ~ %u\n", ji);
     }
