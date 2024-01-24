@@ -48,24 +48,30 @@ static u32 popular_colores_usados_por_vecinos(Grafo G, u32 indice, u32 *Color, u
  * @param Color
  * @return u32
  */
-static u32 coloreo(Grafo G, u32 objetivo, u32 *Color)
+static u32 coloreo(Grafo G, u32 objetivo, u32 *Color, u32 cota)
 {
     // u32 grado = Grado(objetivo, G);
-    u32 color_a_usar = MAX_U32;
+    u32 color_a_usar = NULL_COLOR;
 
     // vector binario que tiene la siguiente semantica
     // 0 - no esta usado
     // 1 - algun vecino lo usa
     u32 *colores_usados = calloc(NumeroDeVertices(G), sizeof(u32));
-
     popular_colores_usados_por_vecinos(G, objetivo, Color, colores_usados);
 
     // encuentro el primer hueco
     for (u32 i = 0; i < NumeroDeVertices(G); i++)
     {
-        if (colores_usados[i] == 0)
+        if (i < cota)
         {
-            color_a_usar = i;
+            if (colores_usados[i] == 0)
+            {
+                color_a_usar = i;
+                break;
+            }
+        } else 
+        { 
+            color_a_usar = NULL_COLOR;
             break;
         }
     }
@@ -142,23 +148,24 @@ static u32 get_best_np(u32 *NP_value, u32 *NP_computed, u32 *Orden, u32 N)
 
 u32 GreedyDinamico(Grafo G, u32 *Orden, u32 *Color, u32 p)
 {
-    // inicializaciones 
+    // inicializaciones
     u32 N = NumeroDeVertices(G);
     u32 *NP_value = calloc(N, sizeof(u32));
     u32 *NP_computed = calloc(N, sizeof(u32)); // 0 not computed, 1 computed
     u32 max_color = 0;
 
-    
     for (u32 i = 0; i < N; i++)
     {
         Color[i] = NULL_COLOR;
     }
 
-    // "si p es igual a 0, entonces se debe considerar como si p fuera 1, 
+    // "si p es igual a 0, entonces se debe considerar como si p fuera 1,
     // porque para calcular la parte dinamica hace falta al menos un vert coloreado"
     p = p == 0 ? 1 : p;
 
-    // cómputo 
+    printf("orden de coloreo: \n\n");
+
+    // cómputo
     for (u32 i = 0; i < N; i++)
     {
         u32 vertice_por_colorear = Orden[i];
@@ -170,7 +177,8 @@ u32 GreedyDinamico(Grafo G, u32 *Orden, u32 *Color, u32 p)
             vertice_por_colorear = get_best_np(NP_value, NP_computed, Orden, N);
         }
 
-        u32 color_usado = coloreo(G, vertice_por_colorear, Color);
+        u32 color_usado = coloreo(G, vertice_por_colorear, Color, max_color +2);
+
 
         if (color_usado == NULL_COLOR)
             return ERROR_CODE;
@@ -181,10 +189,12 @@ u32 GreedyDinamico(Grafo G, u32 *Orden, u32 *Color, u32 p)
             max_color = color_usado;
 
         Color[vertice_por_colorear] = color_usado;
+
+        printf("%u ", vertice_por_colorear);
         if (p <= i)
             np_update(G, Color, NP_value, NP_computed, vertice_por_colorear);
     }
-
+    printf("\n\n");
     return max_color + 1;
 }
 
@@ -307,7 +317,6 @@ char FirstOrder(Grafo G, u32 *Orden, u32 *Color)
     return '0';
 }
 
-
 // COMIENZA SECOND ORDER Complejidad O(n log n)
 struct data_so
 {
@@ -418,5 +427,3 @@ char SecondOrder(Grafo G, u32 *Orden, u32 *Color)
     // queda O(5n + n log n) = O(n log n)
     return '0';
 }
-
-

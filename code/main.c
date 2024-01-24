@@ -37,12 +37,19 @@ int main()
         orden[i] = i;
     }
 
+    u32 normal_perc = (u32)(n/2);
+
     printf("Fin inicializaciones \n");
-    u32 ji = GreedyDinamico(g, orden, color, n-10);
+    u32 ji = GreedyDinamico(g, orden, color,normal_perc);
 
     printf("coloreo :\n");
     for (u32 i = 0; i < n; i++)
     {
+        if (i == normal_perc)
+        {
+            printf("\n");
+        }
+        
         printf("%u ", color[i]);
     }
     printf("\n\n");
@@ -62,44 +69,32 @@ int main()
     else
     {
         if (check == 1)
-            printf("Coloreo No propio, hay vertices sin colorear , %u\n", ji);
+            printf("Coloreo No propio, hay vertices sin colorear , X(G) ~ %u\n", ji);
         else
             printf("Coloreo no propio, hay vertices conectados con el mismo color \n");
     }
 
-    char c = FirstOrder(g, orden, color);
-    printf("Reorder hecho una vez: %s\n", c == '0' ? "SUCCESS" : "FAILURE");
+    // char c = FirstOrder(g, orden, color);
+    // printf("Reorder hecho una vez: %s\n", c == '0' ? "SUCCESS" : "FAILURE");
 
 
-    printf("orden :\n");
-    for (u32 i = 0; i < n; i++)
-    {
-        printf("%u ", orden[i]);
-    }
-    printf("\n\n");
+    // printf("orden :\n");
+    // for (u32 i = 0; i < n; i++)
+    // {
+    //     printf("%u ", orden[i]);
+    // }
+    // printf("\n\n");
 
-    ji = GreedyDinamico(g, orden, color, n + 1);
-    
-    printf("coloreo :\n");
-    for (u32 i = 0; i < n; i++)
-    {
-        printf("%u ", color[i]);
-    }
-    printf("\n\n");
+    // c = SecondOrder(g, orden, color);
+    // printf("Reorder hecho una vez: %s\n", c == '0' ? "SUCCESS" : "FAILURE");
 
-    printf("Fin greedy \n");
-    check = checkear_coloreo(g,color);
-    if (check == 0)
-    {
-        printf("Coloreo Propio: X(G) ~ %u\n", ji);
-    }
-    else
-    {
-        if (check == 1)
-            printf("Coloreo No propio, hay vertices sin colorear , %u\n", ji);
-        else
-            printf("Coloreo no propio, hay vertices conectados con el mismo color \n");
-    }
+
+    // printf("orden :\n");
+    // for (u32 i = 0; i < n; i++)
+    // {
+    //     printf("%u ", orden[i]);
+    // }
+    // printf("\n\n");
 
 
     DestruirGrafo(g);
