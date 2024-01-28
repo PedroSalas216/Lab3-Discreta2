@@ -37,7 +37,7 @@ int main()
         orden[i] = i;
     }
 
-    u32 normal_perc = (u32)(n/2);
+    u32 normal_perc = (u32)(n/100);
 
     printf("Fin inicializaciones \n");
     u32 ji = GreedyDinamico(g, orden, color,normal_perc);

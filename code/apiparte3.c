@@ -97,9 +97,10 @@ static void np_update(Grafo G, u32 *Color, u32 *NP_value, u32 *NP_computed, u32 
     NP_computed[focus_vertex] = 1;
     for (u32 j = 0; j < Grado(focus_vertex, G); j++)
     {
-        if (Color[j] != NULL_COLOR)
+        u32 indice_vecino = IndiceVecino(j,focus_vertex,G);
+        if (Color[indice_vecino] != NULL_COLOR)
         {
-            NP_value[j] = popular_colores_usados_por_vecinos(G, j, Color, colores_usados);
+            NP_value[indice_vecino] = popular_colores_usados_por_vecinos(G, indice_vecino, Color, colores_usados);
         }
     }
 }
@@ -190,7 +191,7 @@ u32 GreedyDinamico(Grafo G, u32 *Orden, u32 *Color, u32 p)
 
         Color[vertice_por_colorear] = color_usado;
 
-        printf("%u ", vertice_por_colorear);
+        
         if (p <= i)
             np_update(G, Color, NP_value, NP_computed, vertice_por_colorear);
     }
