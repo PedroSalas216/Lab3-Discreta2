@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #define USED_COLOR 1
 
-struct np_data
+struct nc_data
 {
     u32 coloreado;
     u32 valor;
@@ -83,29 +83,32 @@ static u32 coloreo(Grafo G, u32 objetivo, u32 *Color, u32 cota)
     return color_a_usar;
 }
 
-// Complejidad O(grado*(3n)) -> tiende a n*n
-static void np_actualizar(Grafo G, u32 *Color, struct np_data *NP, u32 vertice_foco)
+// Complejidad O(delta*(3n)) -> tiende a n*n
+static void nc_actualizar(Grafo G, u32 *Color, struct nc_data *NC, u32 vertice_foco)
 {
     u32 N = NumeroDeVertices(G);
     u32 *colores_usados = calloc(N, sizeof(u32));
 
-    NP[vertice_foco].coloreado = 1;
+    NC[vertice_foco].coloreado = 1;
 
     for (u32 j = 0; j < Grado(vertice_foco, G); j++)
     {
         u32 indice_vecino = IndiceVecino(j, vertice_foco, G);
-        if (!NP[indice_vecino].coloreado)
+        if (!NC[indice_vecino].coloreado)
         {
             // Complejidad O(2n)
             popular_colores_usados_por_vecinos(G, indice_vecino, Color, colores_usados);
             // Complejidad O(n)
-            NP[indice_vecino].valor = cuenta_colores_usados_por_vecinos(colores_usados, N);
+            NC[indice_vecino].valor = cuenta_colores_usados_por_vecinos(colores_usados, N);
         }
     }
+
+    free(colores_usados);
+    colores_usados = NULL;
 }
 
 // Complejidad O(n*(3n))
-static void np_inicializacion(Grafo G, u32 *Color, struct np_data *NP)
+static void nc_inicializacion(Grafo G, u32 *Color, struct nc_data *NC)
 {
     u32 N = NumeroDeVertices(G);
     u32 *colores_usados = calloc(N, sizeof(u32));
@@ -114,36 +117,37 @@ static void np_inicializacion(Grafo G, u32 *Color, struct np_data *NP)
     {
         if (Color[i] != NULL_COLOR)
         {
-            NP[i].coloreado = 1;
+            NC[i].coloreado = 1;
         }
         else
         {
             popular_colores_usados_por_vecinos(G, i, Color, colores_usados);
-            NP[i].valor = cuenta_colores_usados_por_vecinos(colores_usados, N);
+            NC[i].valor = cuenta_colores_usados_por_vecinos(colores_usados, N);
         }
     }
 
     free(colores_usados);
+    colores_usados = NULL;
 }
 
 // Complejidad O(n)
-static u32 obtener_mejor_np(struct np_data *NP, u32 *Orden, u32 N)
+static u32 obtener_mejor_nc(struct nc_data *NC, u32 *Orden, u32 N)
 {
-    u32 mejor_np_indice = ERROR_CODE;
-    u32 mejor_np_valor = 0;
-    u32 mejor_np_valor_init = 0;
+    u32 mejor_nc_indice = ERROR_CODE;
+    u32 mejor_nc_valor = 0;
+    u32 mejor_nc_valor_init = 0;
 
     for (u32 i = 0; i < N; i++)
     {
-        if ((!NP[Orden[i]].coloreado && mejor_np_valor < NP[Orden[i]].valor) ||
-            (mejor_np_indice == ERROR_CODE && !NP[Orden[i]].coloreado && !mejor_np_valor_init))
+        if ((!NC[Orden[i]].coloreado && mejor_nc_valor < NC[Orden[i]].valor) ||
+            (mejor_nc_indice == ERROR_CODE && !NC[Orden[i]].coloreado && !mejor_nc_valor_init))
         {
-            mejor_np_valor_init = 1;
-            mejor_np_indice = i;
-            mejor_np_valor = NP[Orden[i]].valor;
+            mejor_nc_valor_init = 1;
+            mejor_nc_indice = i;
+            mejor_nc_valor = NC[Orden[i]].valor;
         }
     }
-    return mejor_np_indice;
+    return mejor_nc_indice;
 }
 
 // Complejidad greedy comun O(n + (n*3n))                                 -> O(n^2)
@@ -152,7 +156,7 @@ u32 GreedyDinamico(Grafo G, u32 *Orden, u32 *Color, u32 p)
 {
     u32 N = NumeroDeVertices(G);
     u32 max_color = 0;
-    struct np_data *NP = NULL;
+    struct nc_data *NC = NULL;
 
     for (u32 i = 0; i < N; i++)
         Color[i] = NULL_COLOR;
@@ -161,26 +165,26 @@ u32 GreedyDinamico(Grafo G, u32 *Orden, u32 *Color, u32 p)
     // porque para calcular la parte dinamica hace falta al menos un vertice coloreado"
     p = p == 0 ? 1 : p;
     if (p < N)
-        NP = calloc(N, sizeof(struct np_data));
+        NC = calloc(N, sizeof(struct nc_data));
 
     // Greedy comun O(n*3n)                         -> O(n^2)
-    // Greedy dinamico O(n*(3nn+n+1+3n+delta*3n))   -> O(n^3)
+    // Greedy dinamico O(n*(3nn+1+4n+delta*3n))   -> O(n^3)
     for (u32 i = 0; i < N; i++)
     {
         // Complejidad O(3*n*n)
         if (i == p)
-            np_inicializacion(G, Color, NP);
+            nc_inicializacion(G, Color, NC);
 
-        u32 mejor_np;
+        u32 mejor_nc;
         // Complejidad O(n+1)
         if (p <= i)
         {
-            mejor_np = obtener_mejor_np(NP, Orden, N);
+            mejor_nc = obtener_mejor_nc(NC, Orden, N);
 
-            if (mejor_np == ERROR_CODE)
+            if (mejor_nc == ERROR_CODE)
                 return ERROR_CODE;
 
-            swap(i, mejor_np, Orden);
+            swap(i, mejor_nc, Orden);
         }
 
         // Complejidad O(3n)
@@ -188,8 +192,12 @@ u32 GreedyDinamico(Grafo G, u32 *Orden, u32 *Color, u32 p)
         u32 color_usado = coloreo(G, vertice_por_colorear, Color, max_color + 2);
 
         if (color_usado == NULL_COLOR)
+            free(NC);
+            NC = NULL;
             return ERROR_CODE;
         if (Color[vertice_por_colorear] != NULL_COLOR)
+            free(NC);
+            NC = NULL;
             return ERROR_CODE;
 
         if (max_color < color_usado)
@@ -199,9 +207,10 @@ u32 GreedyDinamico(Grafo G, u32 *Orden, u32 *Color, u32 p)
 
         // Complejidad O(delta*3n)
         if (p <= i)
-            np_actualizar(G, Color, NP, vertice_por_colorear);
+            nc_actualizar(G, Color, NC, vertice_por_colorear);
     }
-
+    free(NC);
+    NC = NULL;
     return max_color + 1;
 }
 
