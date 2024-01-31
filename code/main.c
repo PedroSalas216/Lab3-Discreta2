@@ -37,68 +37,92 @@ int main()
         orden[i] = i;
     }
 
+    u32 p=n;
+    u32 check;
+    u32 ji;
+    char c;
+
     printf("Fin inicializaciones \n");
-    u32 ji = GreedyDinamico(g, orden, color, n-10);
-
-    printf("coloreo :\n");
-    for (u32 i = 0; i < n; i++)
-    {
-        printf("%u ", color[i]);
-    }
-    printf("\n\n");
-
-    if (ji == NULL_COLOR)
-    {
-        printf("ERROR HACIENDO GREEDY\n");
-        return 0;
-    }
-
-    printf("Fin greedy \n");
-    u32 check = checkear_coloreo(g, color);
-    if (check == 0)
-    {
-        printf("Coloreo Propio: X(G) ~ %u\n", ji);
-    }
-    else
-    {
-        if (check == 1)
-            printf("Coloreo No propio, hay vertices sin colorear , %u\n", ji);
-        else
-            printf("Coloreo no propio, hay vertices conectados con el mismo color \n");
-    }
-
-    char c = SecondOrder(g, orden, color);
-    printf("Reorder hecho una vez: %s\n", c == '0' ? "SUCCESS" : "FAILURE");
-
-
-    printf("orden :\n");
-    for (u32 i = 0; i < n; i++)
-    {
-        printf("%u ", orden[i]);
-    }
-    printf("\n\n");
-
-    ji = GreedyDinamico(g, orden, color, n + 1);
     
-    printf("coloreo :\n");
-    for (u32 i = 0; i < n; i++)
-    {
-        printf("%u ", color[i]);
-    }
-    printf("\n\n");
 
-    printf("Fin greedy \n");
-    if (checkear_coloreo(g, color))
+
+    for (u32 i = 0; i < 100; i++)
     {
-        printf("Coloreo Propio: X(G) ~ %u\n", ji);
+
+        ji = GreedyDinamico(g, orden, color,p);
+        p++;
+        if (i == 0)
+            printf("initial Ji: %u\n", ji);
+        
+        
+
+        if (ji == ERROR_CODE){
+            printf("ERROR HACIENDO GREEDY\n");
+            return 0;}
+
+        check = checkear_coloreo(g, color);
+
+        if (check != 0){
+            if (check == 1)
+                printf("Coloreo No propio, hay vertices sin colorear , X(G) ~ %u\n", ji);
+
+            if (check == 2)
+                printf("Coloreo no propio, hay vertices conectados con el mismo color \n");
+
+            return 0;}
+
+        if (i%2 == 0)
+        {
+            c = FirstOrder(g, orden, color);
+        }else
+        {
+            c = SecondOrder(g, orden, color);
+        }
+        
+        if (c != '0')
+        {
+            printf("Reorder hecho una vez: %s\n", c == '0' ? "SUCCESS" : "FAILURE");    
+        }
+    
     }
-    else
-    {
-        if (check == 1)
-            printf("Coloreo No propio, hay vertices sin colorear , %u\n", ji);
-        else
-            printf("Coloreo no propio, hay vertices conectados con el mismo color \n");
-    }
+    
+    printf("last Ji: %u\n\n", ji);
+    
+    
+    // printf("Fin greedy \n");
+    // printf("Reorder hecho una vez: %s\n", c == '0' ? "SUCCESS" : "FAILURE");
+    
+    
+
+
+
+    
+    // if (ji == ERROR_CODE)
+    // {
+    //     printf("ERROR HACIENDO GREEDY\n");
+    //     // return 0;
+    // }
+    
+    // printf("Fin greedy \n");
+    // check = checkear_coloreo(g, color);
+    // if (check == 0)
+    // {
+    //     printf("Coloreo Propio: X(G) ~ %u\n", ji);
+    // }
+    // else
+    // {
+    //     if (check == 1)
+    //         printf("Coloreo No propio, hay vertices sin colorear , X(G) ~ %u\n", ji);
+    //     else
+    //         printf("Coloreo no propio, hay vertices conectados con el mismo color \n");
+    // }
+
+
+    // c = SecondOrder(g, orden, color);
+    // printf("Reorder hecho una vez: %s\n", c == '0' ? "SUCCESS" : "FAILURE");
+
+
+    
 
 
     DestruirGrafo(g);
