@@ -53,7 +53,6 @@ static void popular_colores_usados_por_vecinos(Grafo G, u32 indice, u32 *Color, 
 // Complejidad O(3n)
 static u32 coloreo(Grafo G, u32 objetivo, u32 *Color, u32 cota)
 {
-    // u32 grado = Grado(objetivo, G);
     u32 color_a_usar = NULL_COLOR;
 
     // vector binario -> 0 - no esta usado | 1 - algun vecino lo usa
@@ -84,19 +83,19 @@ static u32 coloreo(Grafo G, u32 objetivo, u32 *Color, u32 cota)
     return color_a_usar;
 }
 
-// Complejidad O(grado*(3n)) -> tiende a n*n 
+// Complejidad O(grado*(3n)) -> tiende a n*n
 static void np_actualizar(Grafo G, u32 *Color, struct np_data *NP, u32 vertice_foco)
 {
     u32 N = NumeroDeVertices(G);
     u32 *colores_usados = calloc(N, sizeof(u32));
 
     NP[vertice_foco].coloreado = 1;
-    
+
     for (u32 j = 0; j < Grado(vertice_foco, G); j++)
     {
         u32 indice_vecino = IndiceVecino(j, vertice_foco, G);
         if (!NP[indice_vecino].coloreado)
-        {   
+        {
             // Complejidad O(2n)
             popular_colores_usados_por_vecinos(G, indice_vecino, Color, colores_usados);
             // Complejidad O(n)
@@ -147,31 +146,25 @@ static u32 obtener_mejor_np(struct np_data *NP, u32 *Orden, u32 N)
     return mejor_np_indice;
 }
 
-// Complejidad O(n + (n*3n)) en el mejor de los casos                               -> O(n^2)
-//             O(n + n*(3*n*n + n + 1 + 3n + delta * 3n)) en el peor de los casos   -> O(n^3)
+// Complejidad greedy comun O(n + (n*3n))                                 -> O(n^2)
+// Complejidad greedy comun O(n + n*(3*n*n + delta * 3n + 4n + 1))    -> O(n^3)
 u32 GreedyDinamico(Grafo G, u32 *Orden, u32 *Color, u32 p)
 {
-    // inicializaciones
     u32 N = NumeroDeVertices(G);
     u32 max_color = 0;
     struct np_data *NP = NULL;
 
-    // O(n)
     for (u32 i = 0; i < N; i++)
-    {
         Color[i] = NULL_COLOR;
-    }
-
+  
     // "si p es igual a 0, entonces se debe considerar como si p fuera 1,
-    // porque para calcular la parte dinamica hace falta al menos un vert coloreado"
+    // porque para calcular la parte dinamica hace falta al menos un vertice coloreado"
     p = p == 0 ? 1 : p;
     if (p < N)
-    {
         NP = calloc(N, sizeof(struct np_data));
-    }
 
-    // en el mejor de los casos O(n*3n)                   -> O(n^2)
-    // en el peor de los casos O(n*(3nn+n+1+3n+delta*3n)) -> O(n^3)
+    // Greedy comun O(n*3n)                         -> O(n^2)
+    // Greedy dinamico O(n*(3nn+n+1+3n+delta*3n))   -> O(n^3)
     for (u32 i = 0; i < N; i++)
     {
         // Complejidad O(3*n*n)
