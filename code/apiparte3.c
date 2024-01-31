@@ -135,14 +135,13 @@ static u32 obtener_mejor_nc(struct nc_data *NC, u32 *Orden, u32 N)
 {
     u32 mejor_nc_indice = ERROR_CODE;
     u32 mejor_nc_valor = 0;
-    u32 mejor_nc_valor_init = 0;
-
     for (u32 i = 0; i < N; i++)
     {
+        // "primer NC segun Orden[] tal que su valor es el mayor y no esta coloreado" ||
+        // "primer NC segun Orden[] tal que no esta coloreado y ademas no esta inicializado mejor_nc_valor"
         if ((!NC[Orden[i]].coloreado && mejor_nc_valor < NC[Orden[i]].valor) ||
-            (mejor_nc_indice == ERROR_CODE && !NC[Orden[i]].coloreado && !mejor_nc_valor_init))
+            (mejor_nc_indice == ERROR_CODE && !NC[Orden[i]].coloreado))
         {
-            mejor_nc_valor_init = 1;
             mejor_nc_indice = i;
             mejor_nc_valor = NC[Orden[i]].valor;
         }
@@ -160,7 +159,7 @@ u32 GreedyDinamico(Grafo G, u32 *Orden, u32 *Color, u32 p)
 
     for (u32 i = 0; i < N; i++)
         Color[i] = NULL_COLOR;
-  
+
     // "si p es igual a 0, entonces se debe considerar como si p fuera 1,
     // porque para calcular la parte dinamica hace falta al menos un vertice coloreado"
     p = p == 0 ? 1 : p;
@@ -192,14 +191,17 @@ u32 GreedyDinamico(Grafo G, u32 *Orden, u32 *Color, u32 p)
         u32 color_usado = coloreo(G, vertice_por_colorear, Color, max_color + 2);
 
         if (color_usado == NULL_COLOR)
+        {
             free(NC);
             NC = NULL;
             return ERROR_CODE;
+        }
         if (Color[vertice_por_colorear] != NULL_COLOR)
+        {
             free(NC);
             NC = NULL;
             return ERROR_CODE;
-
+        }
         if (max_color < color_usado)
             max_color = color_usado;
 

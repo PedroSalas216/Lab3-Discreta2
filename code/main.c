@@ -46,7 +46,7 @@ int main()
     
 
 
-    for (u32 i = 0; i < 1000; i++)
+    for (u32 i = 0; i < 100; i++)
     {
 
         ji = GreedyDinamico(g, orden, color,p);
