@@ -5,16 +5,34 @@
 #include <stdlib.h>
 #define USED_COLOR 1
 
-/**
- * @brief Popula el vector binario que indica si los vecinos de el vertice `indice` usaron cada color
- *
- * @param G
- * @param indice
- * @param Color
- * @param colores_usados u32* de tamaño N*(sizeof(u32))
- * @return u32
- */
-static u32 popular_colores_usados_por_vecinos(Grafo G, u32 indice, u32 *Color, u32 *colores_usados)
+struct np_data
+{
+    u32 coloreado;
+    u32 valor;
+};
+
+// Complejidad O(1)
+static void swap(u32 i, u32 j, u32 *array)
+{
+    u32 temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+}
+
+// Complejidad O(n)
+static u32 cuenta_colores_usados_por_vecinos(u32 *colores_usados, u32 N)
+{
+    u32 num_colores_usados = 0;
+    for (u32 i = 0; i < N; i++)
+    {
+        num_colores_usados += colores_usados[i];
+    }
+
+    return num_colores_usados;
+}
+
+// Complejidad O(2n)
+static void popular_colores_usados_por_vecinos(Grafo G, u32 indice, u32 *Color, u32 *colores_usados)
 {
     u32 grado = Grado(indice, G);
 
@@ -30,36 +48,21 @@ static u32 popular_colores_usados_por_vecinos(Grafo G, u32 indice, u32 *Color, u
         if (color_vecino != NULL_COLOR)
             colores_usados[color_vecino] = USED_COLOR;
     }
-
-    u32 num_colores_usados = 0;
-    for (u32 i = 0; i < NumeroDeVertices(G); i++)
-    {
-        num_colores_usados += colores_usados[i];
-    }
-
-    return num_colores_usados;
 }
 
-/**
- * @brief Colorea el vertice objetivo y retorna el color que uso
- *
- * @param G
- * @param objetivo
- * @param Color
- * @return u32
- */
+// Complejidad O(3n)
 static u32 coloreo(Grafo G, u32 objetivo, u32 *Color, u32 cota)
 {
     // u32 grado = Grado(objetivo, G);
     u32 color_a_usar = NULL_COLOR;
 
-    // vector binario que tiene la siguiente semantica
-    // 0 - no esta usado
-    // 1 - algun vecino lo usa
+    // vector binario -> 0 - no esta usado | 1 - algun vecino lo usa
     u32 *colores_usados = calloc(NumeroDeVertices(G), sizeof(u32));
+
+    // Complejidad O(2n)
     popular_colores_usados_por_vecinos(G, objetivo, Color, colores_usados);
 
-    // encuentro el primer hueco
+    // Complejidad O(n)
     for (u32 i = 0; i < NumeroDeVertices(G); i++)
     {
         if (i < cota)
@@ -69,8 +72,9 @@ static u32 coloreo(Grafo G, u32 objetivo, u32 *Color, u32 cota)
                 color_a_usar = i;
                 break;
             }
-        } else 
-        { 
+        }
+        else
+        {
             color_a_usar = NULL_COLOR;
             break;
         }
@@ -80,32 +84,29 @@ static u32 coloreo(Grafo G, u32 objetivo, u32 *Color, u32 cota)
     return color_a_usar;
 }
 
-/**
- * @brief Asume que se llama cuando se colorea el vertice `last_colored_vert`, y procede a actualizar los np de los vertices vecinos
- *
- * @param G
- * @param last_colored_vert
- * @param Color
- * @param NP
- * @return u32
- */
-static void np_update(Grafo G, u32 *Color, u32 *NP_value, u32 *NP_computed, u32 focus_vertex)
+// Complejidad O(grado*(3n)) -> tiende a n*n 
+static void np_actualizar(Grafo G, u32 *Color, struct np_data *NP, u32 vertice_foco)
 {
     u32 N = NumeroDeVertices(G);
     u32 *colores_usados = calloc(N, sizeof(u32));
 
-    NP_computed[focus_vertex] = 1;
-    for (u32 j = 0; j < Grado(focus_vertex, G); j++)
+    NP[vertice_foco].coloreado = 1;
+    
+    for (u32 j = 0; j < Grado(vertice_foco, G); j++)
     {
-        u32 indice_vecino = IndiceVecino(j,focus_vertex,G);
-        if (Color[indice_vecino] != NULL_COLOR)
-        {
-            NP_value[indice_vecino] = popular_colores_usados_por_vecinos(G, indice_vecino, Color, colores_usados);
+        u32 indice_vecino = IndiceVecino(j, vertice_foco, G);
+        if (!NP[indice_vecino].coloreado)
+        {   
+            // Complejidad O(2n)
+            popular_colores_usados_por_vecinos(G, indice_vecino, Color, colores_usados);
+            // Complejidad O(n)
+            NP[indice_vecino].valor = cuenta_colores_usados_por_vecinos(colores_usados, N);
         }
     }
 }
 
-static void np_initialize(Grafo G, u32 *Color, u32 *NP_value, u32 *NP_computed)
+// Complejidad O(n*(3n))
+static void np_inicializacion(Grafo G, u32 *Color, struct np_data *NP)
 {
     u32 N = NumeroDeVertices(G);
     u32 *colores_usados = calloc(N, sizeof(u32));
@@ -114,47 +115,48 @@ static void np_initialize(Grafo G, u32 *Color, u32 *NP_value, u32 *NP_computed)
     {
         if (Color[i] != NULL_COLOR)
         {
-            NP_computed[i] = 1;
+            NP[i].coloreado = 1;
         }
         else
         {
-            NP_value[i] = popular_colores_usados_por_vecinos(G, i, Color, colores_usados);
+            popular_colores_usados_por_vecinos(G, i, Color, colores_usados);
+            NP[i].valor = cuenta_colores_usados_por_vecinos(colores_usados, N);
         }
     }
 
     free(colores_usados);
 }
 
-/**
- * @brief Retorna el indice del vertice cuyo np es el mayor
- *
- * @param NP
- * @param N
- * @return u32
- */
-static u32 get_best_np(u32 *NP_value, u32 *NP_computed, u32 *Orden, u32 N)
+// Complejidad O(n)
+static u32 obtener_mejor_np(struct np_data *NP, u32 *Orden, u32 N)
 {
-    u32 best_np = 0;
-    u32 max_np = 0;
+    u32 mejor_np_indice = ERROR_CODE;
+    u32 mejor_np_valor = 0;
+    u32 mejor_np_valor_init = 0;
+
     for (u32 i = 0; i < N; i++)
     {
-        if (NP_computed[Orden[i]] == 0 && max_np < NP_value[Orden[i]])
+        if ((!NP[Orden[i]].coloreado && mejor_np_valor < NP[Orden[i]].valor) ||
+            (mejor_np_indice == ERROR_CODE && !NP[Orden[i]].coloreado && !mejor_np_valor_init))
         {
-            best_np = Orden[i];
-            max_np = NP_value[Orden[i]];
+            mejor_np_valor_init = 1;
+            mejor_np_indice = i;
+            mejor_np_valor = NP[Orden[i]].valor;
         }
     }
-    return best_np;
+    return mejor_np_indice;
 }
 
+// Complejidad O(n + (n*3n)) en el mejor de los casos                               -> O(n^2)
+//             O(n + n*(3*n*n + n + 1 + 3n + delta * 3n)) en el peor de los casos   -> O(n^3)
 u32 GreedyDinamico(Grafo G, u32 *Orden, u32 *Color, u32 p)
 {
     // inicializaciones
     u32 N = NumeroDeVertices(G);
-    u32 *NP_value = calloc(N, sizeof(u32));
-    u32 *NP_computed = calloc(N, sizeof(u32)); // 0 not computed, 1 computed
     u32 max_color = 0;
+    struct np_data *NP = NULL;
 
+    // O(n)
     for (u32 i = 0; i < N; i++)
     {
         Color[i] = NULL_COLOR;
@@ -163,23 +165,34 @@ u32 GreedyDinamico(Grafo G, u32 *Orden, u32 *Color, u32 p)
     // "si p es igual a 0, entonces se debe considerar como si p fuera 1,
     // porque para calcular la parte dinamica hace falta al menos un vert coloreado"
     p = p == 0 ? 1 : p;
+    if (p < N)
+    {
+        NP = calloc(N, sizeof(struct np_data));
+    }
 
-    printf("orden de coloreo: \n\n");
-
-    // cómputo
+    // en el mejor de los casos O(n*3n)                   -> O(n^2)
+    // en el peor de los casos O(n*(3nn+n+1+3n+delta*3n)) -> O(n^3)
     for (u32 i = 0; i < N; i++)
     {
-        u32 vertice_por_colorear = Orden[i];
+        // Complejidad O(3*n*n)
+        if (i == p)
+            np_inicializacion(G, Color, NP);
+
+        u32 mejor_np;
+        // Complejidad O(n+1)
         if (p <= i)
         {
-            if (i == p)
-                np_initialize(G, Color, NP_value, NP_computed);
+            mejor_np = obtener_mejor_np(NP, Orden, N);
 
-            vertice_por_colorear = get_best_np(NP_value, NP_computed, Orden, N);
+            if (mejor_np == ERROR_CODE)
+                return ERROR_CODE;
+
+            swap(i, mejor_np, Orden);
         }
 
-        u32 color_usado = coloreo(G, vertice_por_colorear, Color, max_color +2);
-
+        // Complejidad O(3n)
+        u32 vertice_por_colorear = Orden[i];
+        u32 color_usado = coloreo(G, vertice_por_colorear, Color, max_color + 2);
 
         if (color_usado == NULL_COLOR)
             return ERROR_CODE;
@@ -191,11 +204,11 @@ u32 GreedyDinamico(Grafo G, u32 *Orden, u32 *Color, u32 p)
 
         Color[vertice_por_colorear] = color_usado;
 
-        
+        // Complejidad O(delta*3n)
         if (p <= i)
-            np_update(G, Color, NP_value, NP_computed, vertice_por_colorear);
+            np_actualizar(G, Color, NP, vertice_por_colorear);
     }
-    printf("\n\n");
+
     return max_color + 1;
 }
 
